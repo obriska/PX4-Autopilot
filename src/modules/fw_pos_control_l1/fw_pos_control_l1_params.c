@@ -854,3 +854,15 @@ PARAM_DEFINE_INT32(FW_GPSF_LT, 30);
  * @group Mission
  */
 PARAM_DEFINE_FLOAT(FW_GPSF_R, 15.0f);
+
+/**
+ * Relative airspeed setpoint (TODO: replace with mavlink)
+ *
+ * @unit norm
+ * @min 0.0
+ * @max 1
+ * @decimal 2
+ * @increment 0.1
+ * @group FW TECS
+ */
+PARAM_DEFINE_FLOAT(FW_AIRSPD_SP_REL, 0.5f);

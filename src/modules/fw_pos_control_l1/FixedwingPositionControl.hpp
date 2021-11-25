@@ -252,6 +252,8 @@ private:
 	float _manual_control_setpoint_altitude{0.0f};
 	float _manual_control_setpoint_airspeed{0.0f};
 
+	float _last_airspeed_setpoint{0.f};
+
 	hrt_abstime _time_in_fixed_bank_loiter{0};
 
 	ECL_L1_Pos_Controller	_l1_control;
@@ -325,15 +327,18 @@ private:
 	void		control_auto_fixed_bank_alt_hold(const hrt_abstime &now);
 	void		control_auto_descend(const hrt_abstime &now);
 
-	void		control_auto_position(const hrt_abstime &now, const Vector2d &curr_pos, const Vector2f &ground_speed,
+	void		control_auto_position(const hrt_abstime &now, const float dt, const Vector2d &curr_pos,
+					      const Vector2f &ground_speed,
 					      const position_setpoint_s &pos_sp_prev, const position_setpoint_s &pos_sp_curr);
-	void		control_auto_loiter(const hrt_abstime &now, const Vector2d &curr_pos, const Vector2f &ground_speed,
+	void		control_auto_loiter(const hrt_abstime &now, const float dt, const Vector2d &curr_pos,
+					    const Vector2f &ground_speed,
 					    const position_setpoint_s &pos_sp_prev, const position_setpoint_s &pos_sp_curr, const position_setpoint_s &pos_sp_next);
 	void		control_auto_takeoff(const hrt_abstime &now, const float dt,  const Vector2d &curr_pos,
 					     const Vector2f &ground_speed,
 					     const position_setpoint_s &pos_sp_prev,
 					     const position_setpoint_s &pos_sp_curr);
-	void		control_auto_landing(const hrt_abstime &now, const Vector2d &curr_pos, const Vector2f &ground_speed,
+	void		control_auto_landing(const hrt_abstime &now, const float dt, const Vector2d &curr_pos,
+					     const Vector2f &ground_speed,
 					     const position_setpoint_s &pos_sp_prev,
 					     const position_setpoint_s &pos_sp_curr);
 	void		control_manual_altitude(const hrt_abstime &now, const Vector2d &curr_pos, const Vector2f &ground_speed);
@@ -342,8 +347,9 @@ private:
 	float		get_tecs_pitch();
 	float		get_tecs_thrust();
 
-	float		get_demanded_airspeed();
-	float		calculate_target_airspeed(float airspeed_demand, const Vector2f &ground_speed);
+	float		get_manual_airspeed_setpoint();
+	float		get_auto_airspeed_setpoint(const hrt_abstime &now, const float pos_sp_cru_airspeed,
+			const Vector2f &ground_speed, float dt);
 
 	void		reset_takeoff_state(bool force = false);
 	void		reset_landing_state();
@@ -421,6 +427,8 @@ private:
 		(ParamFloat<px4::params::FW_THR_SLEW_MAX>) _param_fw_thr_slew_max,
 
 		(ParamBool<px4::params::FW_POSCTL_INV_ST>) _param_fw_posctl_inv_st,
+
+		(ParamFloat<px4::params::FW_AIRSPD_SP_REL>) _param_fw_airspd_sp_rel,
 
 
 		(ParamInt<px4::params::FW_GPSF_LT>) _param_nav_gpsf_lt,
