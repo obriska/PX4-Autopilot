@@ -1042,15 +1042,6 @@ FixedwingPositionControl::control_auto_position(const hrt_abstime &now, const fl
 		prev_wp(1) = pos_sp_curr.lon;
 	}
 
-
-	float mission_airspeed = _param_fw_airspd_trim.get();
-
-	if (PX4_ISFINITE(pos_sp_curr.cruising_speed) &&
-	    pos_sp_curr.cruising_speed > 0.1f) {
-
-		mission_airspeed = pos_sp_curr.cruising_speed;
-	}
-
 	float tecs_fw_thr_min;
 	float tecs_fw_thr_max;
 	float tecs_fw_mission_throttle;
@@ -1116,7 +1107,7 @@ FixedwingPositionControl::control_auto_position(const hrt_abstime &now, const fl
 	_att_sp.yaw_body = _yaw; // yaw is not controlled, so set setpoint to current yaw
 
 	tecs_update_pitch_throttle(now, position_sp_alt,
-				   get_auto_airspeed_setpoint(now, mission_airspeed, ground_speed, dt),
+				   get_auto_airspeed_setpoint(now, pos_sp_curr.cruising_speed, ground_speed, dt),
 				   radians(_param_fw_p_lim_min.get()),
 				   radians(_param_fw_p_lim_max.get()),
 				   tecs_fw_thr_min,
@@ -1150,12 +1141,12 @@ FixedwingPositionControl::control_auto_loiter(const hrt_abstime &now, const floa
 		prev_wp(1) = pos_sp_curr.lon;
 	}
 
-	float mission_airspeed = _param_fw_airspd_trim.get();
+	float airspeed_sp = -1.f;
 
 	if (PX4_ISFINITE(pos_sp_curr.cruising_speed) &&
-	    pos_sp_curr.cruising_speed > 0.1f) {
+	    pos_sp_curr.cruising_speed > FLT_EPSILON) {
 
-		mission_airspeed = pos_sp_curr.cruising_speed;
+		airspeed_sp = pos_sp_curr.cruising_speed;
 	}
 
 	float tecs_fw_thr_min;
@@ -1204,7 +1195,7 @@ FixedwingPositionControl::control_auto_loiter(const hrt_abstime &now, const floa
 		// landing airspeed and potentially tighter altitude control) already such that we don't
 		// have to do this switch (which can cause significant altitude errors) close to the ground.
 		_tecs.set_height_error_time_constant(_param_fw_thrtc_sc.get() * _param_fw_t_h_error_tc.get());
-		mission_airspeed = _param_fw_lnd_airspd_sc.get() * _param_fw_airspd_min.get();
+		airspeed_sp = _param_fw_lnd_airspd_sc.get() * _param_fw_airspd_min.get();
 		_att_sp.apply_flaps = true;
 	}
 
@@ -1227,7 +1218,7 @@ FixedwingPositionControl::control_auto_loiter(const hrt_abstime &now, const floa
 	}
 
 	tecs_update_pitch_throttle(now, alt_sp,
-				   get_auto_airspeed_setpoint(now, mission_airspeed, ground_speed, dt),
+				   get_auto_airspeed_setpoint(now, airspeed_sp, ground_speed, dt),
 				   radians(_param_fw_p_lim_min.get()),
 				   radians(_param_fw_p_lim_max.get()),
 				   tecs_fw_thr_min,
