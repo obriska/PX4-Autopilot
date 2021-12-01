@@ -369,6 +369,19 @@ FixedwingPositionControl::get_auto_airspeed_setpoint(const hrt_abstime &now, con
 	// adapt min airspeed based on wind, groundspeed undershoot and load factor (stall prevention)
 	float airspeed_min_adjusted = _param_fw_airspd_min.get();
 
+	// Adapt min airspeed setpoint based on wind estimate (disable in airspeed-less mode)
+	if (_airspeed_valid && _param_fw_wind_arsp_sc.get() > FLT_EPSILON) {
+		wind_s wind_estimate;
+
+		if (_wind_sub.update(&wind_estimate)) {
+			const matrix::Vector2f wind(wind_estimate.windspeed_north, wind_estimate.windspeed_east);
+
+			if (PX4_ISFINITE(wind.length())) {
+				airspeed_min_adjusted += _param_fw_wind_arsp_sc.get() * wind.length();
+			}
+		}
+	}
+
 	// Adapt cruise airspeed when otherwise the min groundspeed couldn't be maintained
 	if (!_l1_control.circle_mode()) {
 		/*

@@ -856,13 +856,18 @@ PARAM_DEFINE_INT32(FW_GPSF_LT, 30);
 PARAM_DEFINE_FLOAT(FW_GPSF_R, 15.0f);
 
 /**
- * Relative airspeed setpoint (TODO: replace with mavlink)
+ * Wind-based airspeed min scaling
+ *
+ * Multiplying this factor with the current absolute wind estimate gives the airspeed offset
+ * added to the minimum airspeed. This helps to make the system more robust against disturbances in high wind.
+ *
+ * airspeed_setpoint >= FW_AIRSPD_MIN + FW_LND_AIRSPD_SC * wind
  *
  * @unit norm
- * @min 0.0
- * @max 1
+ * @min 0
+ * @max 2
  * @decimal 2
- * @increment 0.1
+ * @increment 0.01
  * @group FW TECS
  */
-PARAM_DEFINE_FLOAT(FW_AIRSPD_SP_REL, 0.5f);
+PARAM_DEFINE_FLOAT(FW_WIND_ARSP_SC, 0.0f);
